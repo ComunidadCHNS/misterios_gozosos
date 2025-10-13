@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Primer Misterio Doloroso</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 1em;
+      background: #f5f5f5;
+    }
+    h2 {
+      color: #003366;
+    }
+    .rosario {
+      position: relative;
+      width: 220px;
+      height: 300px;
+      margin: 20px auto 40px auto;
+    }
+    .cuenta {
+      --total: 10;
+      --angle: calc(360deg / var(--total));
+      width: 30px;
+      height: 30px;
+      background: lightgray;
+      border-radius: 50%;
+      border: 2px solid #003366;
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform:
+        rotate(calc((var(--i) - 1) * var(--angle)))
+        translate(90px)
+        rotate(calc((var(--i) - 1) * -1 * var(--angle)));
+      transition: background-color 0.3s;
+    }
+    .cruz {
+      width: 12px;
+      height: 40px;
+      background: #003366;
+      position: absolute;
+      top: 88%;
+      left: 58%;
+      transform: translate(-50%, 0);
+      border-radius: 2px;
+      transition: transform 0.5s ease-in-out;
+    }
+    .cruz::before {
+      content: "";
+      width: 32px;
+      height: 12px;
+      background: #003366;
+      position: absolute;
+      top: 12px;
+      left: -10px;
+      border-radius: 2px;
+    }
+    .cruz.animar {
+      animation: cruzBrilla 1.5s ease-in-out;
+    }
+    @keyframes cruzBrilla {
+      0%, 100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+      50% { transform: translate(-50%, 0) scale(1.4); opacity: 0.6; }
+    }
+    .activa {
+      background-color: #005A9C;
+    }
+    .boton {
+      padding: 10px 20px;
+      background-color: #003366;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .boton:disabled {
+      background-color: #cccccc;
+      cursor: default;
+    }
+    .oracion {
+      font-size: 1.2em;
+      margin-top: 20px;
+      min-height: 2em;
+      max-width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .finalizado {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    .imagen-misterio {
+	  widht:250px;
+      max-width: 50%;
+      margin: 20px auto;
+      display: block;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .descripcion-misterio {
+      font-style: italic;
+      margin-top: 10px;
+      color: #333;
+      max-width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <h2>Primer Misterio Doloroso</h2>
+  <p>Reza un Padre Nuestro y luego las 10 Ave Marías.</p>
+  <img class="imagen-misterio" src="Primer_Misterio_Doloroso.webp" alt="Jesús ora en el huerto" />
+  <p class="descripcion-misterio">
+    Jesús ora en el huerto de Getsemaní. “Padre, si quieres, aparta de mí este cáliz; pero no se haga mi voluntad, sino la tuya.” (Lucas 22:42)
+  </p>
+  <div class="rosario" id="cuentas">
+    <div class="cruz" id="cruz"></div>
+  </div>
+  <div>
+    <button class="boton" onclick="retroceder()" id="btnAnterior">Anterior</button>
+    <button class="boton" onclick="avanzar()" id="btnSiguiente">Comenzar</button>
+  </div>
+  <div class="oracion" id="oracion"></div>
+  <div class="finalizado" id="mensajeFinal"></div>
+
+  <script>
+    const cuentas = document.getElementById("cuentas");
+    const oracion = document.getElementById("oracion");
+    const btnAnterior = document.getElementById("btnAnterior");
+    const btnSiguiente = document.getElementById("btnSiguiente");
+    const mensajeFinal = document.getElementById("mensajeFinal");
+    const cruz = document.getElementById("cruz");
+
+    let paso = 0;
+    const oraciones = [
+      "Padre Nuestro, que estás en el cielo, santificado sea Tu Nombre, Venga a nosotros Tu Reino, hágase Tu Voluntad así en la tierra como en el Cielo. Danos hoy nuestro pan de cada día, perdona nuestras ofensas así como nosotros perdonamos a quienes nos ofenden. No nos dejes caer en tentación, más bien líbranos del mal. Amén.",
+      ...Array.from({ length: 10 }, (_, i) => `Ave María ${i + 1}: Dios te Salve María, llena eres de Gracia, El Señor es contigo. Bendita tú eres entre todas las mujeres y bendito es el fruto de tu vientre, Jesús. Santa María, Madre de Dios, ruega por nosotros, los pecadores, ahora y en la hora de nuestra muerte. Amén.`),
+      "Gloria al Padre, al Hijo y al Espíritu Santo- Como era en un principio, ahora y siempre, por los siglos de los siglos. Amén.",
+      "Oh Jesús mío, perdona nuestros pecados, líbranos del fuego del infierno, lleva a todas las almas al cielo y socorre especialmente a las más necesitadas de tu Divina Misericordia. Amén."
+    ];
+
+    const rotaciones = [3, 2, 1, 10, 9, 8, 7, 6, 5, 4];
+
+    for (let i = 0; i < 10; i++) {
+      const cuenta = document.createElement("div");
+      cuenta.classList.add("cuenta");
+      cuenta.style.setProperty('--i', rotaciones[i]);
+      cuentas.appendChild(cuenta);
+    }
+
+    function mostrarOracion() {
+      oracion.textContent = oraciones[paso];
+      const cuentasHijas = cuentas.querySelectorAll('.cuenta');
+      for (let i = 0; i < cuentasHijas.length; i++) {
+        cuentasHijas[i].classList.remove("activa");
+      }
+      if (paso > 0 && paso <= 10) {
+        for (let i = 0; i < paso; i++) {
+          cuentasHijas[i].classList.add("activa");
+        }
+      }
+      btnAnterior.disabled = paso === 0;
+      if (paso === oraciones.length - 1) {
+        btnSiguiente.textContent = "Finalizado";
+        btnSiguiente.disabled = true;
+        mensajeFinal.textContent = "Has finalizado este misterio. Serás redirigido en unos segundos.";
+
+        cruz.classList.add("animar");
+
+        setTimeout(() => {
+          window.location.href = "https://sites.google.com/view/comunidad-catolica-chns/santo-rosario";
+        }, 5000);
+
+      } else {
+        btnSiguiente.textContent = paso === 0 ? "Comenzar" : "Siguiente";
+        btnSiguiente.disabled = false;
+        mensajeFinal.textContent = "";
+        cruz.classList.remove("animar");
+      }
+    }
+
+    function avanzar() {
+      if (paso < oraciones.length - 1) {
+        paso++;
+        mostrarOracion();
+      }
+    }
+
+    function retroceder() {
+      if (paso > 0) {
+        paso--;
+        mostrarOracion();
+      }
+    }
+
+    mostrarOracion();
+  </script>
+</body>
+</html>
